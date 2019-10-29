@@ -2,6 +2,7 @@
 guideBooks = {}
 local c = {}
 guideBooks.registered = {}
+guideBooks.indices = {}
 
 c.register_guideBook = function(name, def)
 	local _def = {}
@@ -54,17 +55,25 @@ c.register_guideBook = function(name, def)
 			local seg=string.split(meta:get_string("guidebooks:place"), ":")
 			if fields.beginning then
 				local y=-0.1
-					x=1
-					num=0
+					local x=1					
+					local num=0
 					local form=reg.pageTmp
 					for _,v in pairs(reg.sections) do
-						if  _ ~= "Main" and _ ~= "Hidden" then
-							form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-							y=y+0.6
-							num=num+1
-							if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+						if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+							if v.master then
+								form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
+								y=y+0.6
+								num=num+1
+								if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+							else
+								form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
+								y=y+0.6
+								num=num+1
+								if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+							end
 						end
 					end
+					form=form..reg.prevTmp
 					minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
 					meta:set_string("guidebooks:place", "Main:Index")
 			elseif fields.next then
@@ -74,10 +83,14 @@ c.register_guideBook = function(name, def)
 						pn=pn+1
 						if reg.sections[seg[1]] then
 							if reg.sections[seg[1]].Pages[pn] then
-								form=reg.sections[seg[1]].Pages[pn].form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-0.5)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]"
-								form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-0.5)..";;;"..reg.sections[seg[1]].Pages[pn].text2.."]"
+								form=reg.sections[seg[1]].Pages[pn].form
+								if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-0.5)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
+								if reg.sections[seg[1]].Pages[pn].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-0.5)..";;;"..reg.sections[seg[1]].Pages[pn].text2.."]" end
 								if reg.sections[seg[1]].Pages[pn+1] then
 									form=form..reg.nextTmp
+								end
+								if reg.sections[seg[1]].Pages[pn-1] then
+									form=form..reg.prevTmp
 								end
 								meta:set_string("guidebooks:place", seg[1]..":"..pn)
 								minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
@@ -95,17 +108,25 @@ c.register_guideBook = function(name, def)
 					end
 				else
 					local y=-0.1
-					x=1
-					num=0
+					local x=1
+					local num=0
 					local form=reg.pageTmp
 					for _,v in pairs(reg.sections) do
-						if  _ ~= "Main" and _ ~= "Hidden" then
-							form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-							y=y+0.6
-							num=num+1
-							if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+						if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+							if v.master then
+								form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
+								y=y+0.6
+								num=num+1
+								if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+							else
+								form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
+								y=y+0.6
+								num=num+1
+								if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+							end
 						end
 					end
+					form=form..reg.prevTmp
 					minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
 					meta:set_string("guidebooks:place", "Main:Index")
 				end
@@ -117,10 +138,14 @@ c.register_guideBook = function(name, def)
 						pn=pn-1
 						if reg.sections[seg[1]] then
 							if reg.sections[seg[1]].Pages[pn] then
-								form=reg.sections[seg[1]].Pages[pn].form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-0.5)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]"
-								form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-0.5)..";;;"..reg.sections[seg[1]].Pages[pn].text2.."]"
+								form=reg.sections[seg[1]].Pages[pn].form
+								if v.Pages[1].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-0.5)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
+								if v.Pages[1].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-0.5)..";;;"..reg.sections[seg[1]].Pages[pn].text2.."]" end
 								if reg.sections[seg[1]].Pages[pn+1] then
 									form=form..reg.nextTmp
+								end
+								if reg.sections[seg[1]].Pages[pn-1] then
+									form=form..reg.prevTmp
 								end
 								meta:set_string("guidebooks:place", seg[1]..":"..pn)
 								minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
@@ -130,15 +155,22 @@ c.register_guideBook = function(name, def)
 									minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
 								else
 									local y=-0.1
-									x=1
-									num=0
+									local x=1
+									local num=0
 									local form=reg.pageTmp
 									for _,v in pairs(reg.sections) do
-										if  _ ~= "Main" and _ ~= "Hidden" then
-											form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-											y=y+0.6
-											num=num+1
-											if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+										if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+											if v.master then
+												form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
+												y=y+0.6
+												num=num+1
+												if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+											else
+												form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
+												y=y+0.6
+												num=num+1
+												if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+											end
 										end
 									end
 									minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
@@ -151,15 +183,22 @@ c.register_guideBook = function(name, def)
 								minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
 							else
 								local y=-0.1
-								x=1
-								num=0
+								local x=1
+								local num=0
 								local form=reg.pageTmp
 								for _,v in pairs(reg.sections) do
-									if  _ ~= "Main" and _ ~= "Hidden" then
-										form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-										y=y+0.6
-										num=num+1
-										if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+									if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+										if v.master then
+											form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
+											y=y+0.6
+											num=num+1
+											if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+										else
+											form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
+											y=y+0.6
+											num=num+1
+											if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+										end
 									end
 								end
 								minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
@@ -172,15 +211,22 @@ c.register_guideBook = function(name, def)
 							minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
 						else
 							local y=-0.1
-							x=1
-							num=0
+							local x=1
+							local num=0
 							local form=reg.pageTmp
 							for _,v in pairs(reg.sections) do
-								if  _ ~= "Main" and _ ~= "Hidden" then
-									form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-									y=y+0.6
-									num=num+1
-									if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+								if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+									if v.master then
+										form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
+										y=y+0.6
+										num=num+1
+										if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+									else
+										form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
+										y=y+0.6
+										num=num+1
+										if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+									end
 								end
 							end
 							minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
@@ -193,13 +239,34 @@ c.register_guideBook = function(name, def)
 				for _,v in pairs(reg.sections) do
 					if fields["goto_".._] then
 						if v.Pages[1] then
-							form=v.Pages[1].form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text1.."]"
-							form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text2.."]"
+							local form=v.Pages[1].form
+							if v.Pages[1].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text1.."]" end
+							if v.Pages[1].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text2.."]" end
 							if v.Pages[2] then
 								form=form..reg.nextTmp
 							end
 							meta:set_string("guidebooks:place", _..":".."1")
 							minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
+						end
+					end
+					if fields["gotoM_".._] then
+						if v.master then
+							if guideBooks.indices[book:get_name().._] then
+								local y=-0.1
+								local x=1
+								local num=0
+								local form=reg.pageTmp
+								for __,v in pairs(reg.sections) do
+									if  v.slave and v.slave==_ and not v.hidden then
+										form=form.."style[goto_"..__..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_"..__..";"..(v.description or _).."]"
+										y=y+0.6
+										num=num+1
+										if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+									end
+								end
+								minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
+								meta:set_string("guidebooks:place", "Sub:Index")
+							end
 						end
 					end
 				end
@@ -221,8 +288,6 @@ c.register_guideBook = function(name, def)
 	local next="style[next;border=false]image_button["..(_def.style.page.w-0.7)..","..(_def.style.page.h-0.5)..";1,1;".._def.style.page.next..";next;]"
 	local prev="style[prev;border=false]image_button[0,"..(_def.style.page.h-0.5)..";1,1;".._def.style.page.prev..";prev;]"
 	
-	page=page..prev
-	
 	guideBooks.registered[name]={coverTmp=cover, pageTmp=page, nextTmp=next, prevTmp=prev, sections={Main={Pages={Index={}}}, Hidden={Pages={}}}}
 	
 	minetest.register_craftitem(name, _def)
@@ -231,6 +296,18 @@ end
 c.register_section = function(book, name, def)
 	if guideBooks.registered[book] then
 		def.Pages={}
+		if def.slave and def.master then error("Attempt to register slave as index") end
+		if def.slave then
+			if guideBooks.registered[book].sections[def.slave] and guideBooks.registered[book].sections[def.slave].master and guideBooks.indices[book..def.slave] then
+				guideBooks.indices[book..def.slave][name]=def
+			else
+				error("Attempt to register slave to non-existent master")
+			end
+		end
+		if def.master then
+			guideBooks.indices[book..name]={}
+		end
+		def.name=name
 		guideBooks.registered[book].sections[name]=def
 	else
 		error("Attempt to register section in non-existent guide")
@@ -243,8 +320,8 @@ c.register_page = function(book, section, num, def)
 			local _def={}
 			_def.form =def.form or guideBooks.registered[book].pageTmp
 			if def.extra then _def.form=_def.form..def.extra end
-			_def.text1 = def.text1 or ""
-			_def.text2 = def.text2 or ""
+			if def.text1 then _def.text1=def.text1 end
+			if def.text2 then _def.text2=def.text2 end
 			guideBooks.registered[book].sections[section].Pages[num]=_def
 		else
 			error("Attempt to register page in non-existent section")
@@ -269,6 +346,17 @@ guideBooks.Common.register_page("guidebooks:test", "b", 2, {text1="Another", tex
 
 guideBooks.Common.register_page("guidebooks:test", "c", 1, {text1="", text2="An image", extra="background[0,0;5,8;guidebooks_map.png;false]"})
 
-for i=1,25 do
-	guideBooks.Common.register_section("guidebooks:test", ""..i, {description="Empty Section"})
-end
+guideBooks.Common.register_section("guidebooks:test", "d", {description="Hidden Section", hidden=1})
+guideBooks.Common.register_page("guidebooks:test", "d", 1, {text1="wow you", text2="found the"})
+guideBooks.Common.register_page("guidebooks:test", "d", 2, {text1="hidden", text2="section"})
+
+guideBooks.Common.register_section("guidebooks:test", "e", {description="Empty Section"})
+guideBooks.Common.register_section("guidebooks:test", "f", {description="Master Section", master=1})
+guideBooks.Common.register_section("guidebooks:test", "g", {description="Empty Slave Section", slave="f"})
+guideBooks.Common.register_section("guidebooks:test", "h", {description="Slave Section", slave="f"})
+
+guideBooks.Common.register_page("guidebooks:test", "h", 1, {text1="Some text", text2="Some other text"})
+guideBooks.Common.register_page("guidebooks:test", "h", 2, {text1="Some more", text2="Even more text"})
+
+guideBooks.Common.register_section("guidebooks:test", "i", {description="Connected Slave Section", slave="f"})
+guideBooks.Common.register_page("guidebooks:test", "i", 1, {text2="Wow A link", extra="style[goto_d;border=false]image_button[1,1;4,1;guidebooks_bscBtn.png;goto_d;hidden section]"})
