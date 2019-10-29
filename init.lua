@@ -295,7 +295,6 @@ end
 
 c.register_section = function(book, name, def)
 	if guideBooks.registered[book] then
-		def.Pages={}
 		if def.slave and def.master then error("Attempt to register slave as index") end
 		if def.slave then
 			if guideBooks.registered[book].sections[def.slave] and guideBooks.registered[book].sections[def.slave].master and guideBooks.indices[book..def.slave] then
