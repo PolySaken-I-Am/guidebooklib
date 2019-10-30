@@ -42,21 +42,28 @@ guideBooks.Common.register_section(
 	"modname:itemname",             -- The name of a registered book
 	"section_1",                    -- The name to give the section, only string values supported
 	{                               -- A list of preset values (you could also put page definitions here.)
-		description="Section 1",     --- The display name of the section
-		hidden=false,                --- Whether the section is visible in the main index (set to true to hide)
-		master=false,                --- Whether this section leads to an index (set to true to create a new index under this section)
-		slave=false,                 --- Set to false to show in the main index, set to the name of another section to show in that index. cannot be used with master=true
+		description="Section 1",    --- The display name of the section
+		hidden=false,               --- Whether the section is visible in the main index (set to true to hide)
+		master=false,               --- Whether this section leads to an index (set to true to create a new index under this section)
+		slave=false,                --- Set to false to show in the main index, set to the name of another section to show in that index. cannot be used with master=true
+		Pages={                		--- The pages to preload into the section (use only for certain instances when required)
+			Index={}                ---- A special page used only by the 'Main' section that loads after the cover
+		}
 	}
 )
+
+The sections 'Hidden' and 'Main' exist in any book by default
 
 -- adding pages
 guideBooks.Common.register_page(
 	"modname:itemname",                                       -- The name of a registered book
 	"section_1",                                              -- The name of a section in the book
-	1,                                                        -- the page number
+	1,                                                        -- the page number (or name in the case of special pages such as Index)
 	{                                                         -- content definition
 		text1="foo bar",                                      --- the text to display on the first half of the page
 		text2="lorem ipsum dolor sit amet",                   --- the text to display on the second half of the page
 		extra="background[0,0;5,8;modname_image.png;false]"   --- A minetest formspec string used to add extra content to a page, such as an image
 	}
 )
+
+The page 'Index' exists in the 'MAin' section by default but can be overriden.
