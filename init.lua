@@ -3,6 +3,7 @@ guideBooks = {}
 local c = {}
 guideBooks.registered = {}
 guideBooks.indices = {}
+guideBooks.locks={}
 
 c.register_guideBook = function(name, def)
 	local _def = {}
@@ -60,7 +61,7 @@ c.register_guideBook = function(name, def)
 					local num=0
 					local form=reg.pageTmp
 					for _,v in pairs(reg.sections) do
-						if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+						if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and not v.isLocked(reader, book:get_name(), _) then
 							if v.master then
 								form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
 								y=y+0.6
@@ -121,7 +122,7 @@ c.register_guideBook = function(name, def)
 						local num=0
 						local form=reg.pageTmp
 						for _,v in pairs(reg.sections) do
-							if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+							if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and not v.isLocked(reader, book:get_name(), _) then
 								if v.master then
 									form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
 									y=y+0.6
@@ -176,7 +177,7 @@ c.register_guideBook = function(name, def)
 										local num=0
 										local form=reg.pageTmp
 										for _,v in pairs(reg.sections) do
-											if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+											if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and not v.isLocked(reader, book:get_name(), _) then
 												if v.master then
 													form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
 													y=y+0.6
@@ -213,7 +214,7 @@ c.register_guideBook = function(name, def)
 									local num=0
 									local form=reg.pageTmp
 									for _,v in pairs(reg.sections) do
-										if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+										if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and not v.isLocked(reader, book:get_name(), _) then
 											if v.master then
 												form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
 												y=y+0.6
@@ -250,7 +251,7 @@ c.register_guideBook = function(name, def)
 								local num=0
 								local form=reg.pageTmp
 								for _,v in pairs(reg.sections) do
-									if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+									if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and not v.isLocked(reader, book:get_name(), _) then
 										if v.master then
 											form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
 											y=y+0.6
@@ -300,7 +301,7 @@ c.register_guideBook = function(name, def)
 								local num=0
 								local form=reg.pageTmp
 								for __,v in pairs(reg.sections) do
-									if  v.slave and v.slave==_ and not v.hidden then
+									if  v.slave and v.slave==_ and not v.hidden and not v.isLocked(reader, book:get_name(), __) then
 										form=form.."style[goto_"..__..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_"..__..";"..(v.description or _).."]"
 										y=y+0.6
 										num=num+1
@@ -354,6 +355,10 @@ c.register_section = function(book, name, def)
 			guideBooks.indices[book..name]={}
 		end
 		def.name=name
+		if def.locked then guideBooks.locks[name]=book..":"..name..":locked" end
+		def.isLocked = function(player, book, section)
+			return player:get_meta():get_string(book..":"..section..":".."locked") == "true"
+		end
 		guideBooks.registered[book].sections[name]=def
 	else
 		error("Attempt to register section in non-existent guide")
@@ -377,6 +382,29 @@ c.register_page = function(book, section, num, def)
 		error("Attempt to register page in non-existent guide")
 	end
 end
+
+minetest.register_on_joinplayer(function(player)
+	local meta=player:get_meta()
+	for _,v in ipairs(guideBooks.locks) do
+		if meta:get_string(v) then
+			if not meta:get_string(v) == "false" then
+				meta:set_string(v, "true")
+			end
+		else
+			meta:set_string(v, "true")
+		end
+	end
+end)
+
+minetest.register_chatcommand("unlock", {
+	params="name",
+	description="",
+	privs={server=true},
+	func=function(name, param)
+		local player=minetest.get_player_by_name(player)
+		player:get_meta():set_string(param, "false")
+	end,
+})
 
 guideBooks.Common=c
 
@@ -409,3 +437,6 @@ guideBooks.Common.register_page("guidebooks:test", "h", 2, {text1="Some more", t
 
 guideBooks.Common.register_section("guidebooks:test", "i", {description="Connected Slave Section", slave="f"})
 guideBooks.Common.register_page("guidebooks:test", "i", 1, {text2="Wow A link", extra="style[goto_d;border=false]image_button[1,1;4,1;guidebooks_bscBtn.png;goto_d;hidden section]"})
+
+guideBooks.Common.register_section("guidebooks:test", "j", {description="Locked section", locked=true})
+guideBooks.Common.register_page("guidebooks:test", "j", 1, {text1="Some more", text2="Even more text"})
