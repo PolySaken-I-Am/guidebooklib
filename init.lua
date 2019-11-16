@@ -5,6 +5,57 @@ guideBooks.registered = {}
 guideBooks.indices = {}
 guideBooks.locks={}
 
+local genSecList=function(reg, meta, reader, book, def)
+	if not reg.sections.Main.Pages.Index.registered then
+		local y=-0.1
+		local x=1
+		local num=0
+		local form=reg.pageTmp
+		for _,v in pairs(reg.sectionOrder) do
+			local _ = v
+			local v= reg.sections[_]
+			if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
+				if v.locked then
+					if v.isUnLocked(reader, book:get_name(), _) then
+						if v.master then
+							form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
+							y=y+0.6
+							num=num+1
+							if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+						else
+							form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
+							y=y+0.6
+							num=num+1
+							if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+						end
+					end
+				else
+					if v.master then
+						form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
+						y=y+0.6
+						num=num+1
+						if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+					else
+						form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
+						y=y+0.6
+						num=num+1
+						if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+					end
+				end
+			end
+		end
+		minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
+		meta:set_string("guidebooks:place", "Main:Index")
+	else
+		local form=reg.sections.Main.Pages.Index.form
+		if reg.sections.Main.Pages.Index.text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text1.."]" end
+		if reg.sections.Main.Pages.Index.text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text2.."]" end
+		form=form..reg.prevTmp
+		minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
+		meta:set_string("guidebooks:place", "Main:Index")
+	end
+end
+
 c.register_guideBook = function(name, def)
 	local _def = {}
 	
@@ -55,36 +106,7 @@ c.register_guideBook = function(name, def)
 			local reg=guideBooks.registered[book:get_name()]
 			local seg=string.split(meta:get_string("guidebooks:place"), ":")
 			if fields.beginning then
-				if not reg.sections.Main.Pages.Index.registered then
-					local y=-0.1
-					local x=1
-					local num=0
-					local form=reg.pageTmp
-					for _,v in pairs(reg.sections) do
-						if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and not v.isLocked(reader, book:get_name(), _) then
-							if v.master then
-								form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
-								y=y+0.6
-								num=num+1
-								if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-							else
-								form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-								y=y+0.6
-								num=num+1
-								if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-							end
-						end
-					end
-					minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
-					meta:set_string("guidebooks:place", "Main:Index")
-				else
-					local form=reg.sections.Main.Pages.Index.form
-					if reg.sections.Main.Pages.Index.text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text1.."]" end
-					if reg.sections.Main.Pages.Index.text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text2.."]" end
-					form=form..reg.prevTmp
-					minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
-					meta:set_string("guidebooks:place", "Main:Index")
-				end
+				genSecList(reg, meta, reader, book, def)
 			elseif fields.next then
 				if #seg == 2 then
 					local pn=tonumber(seg[2])
@@ -116,36 +138,7 @@ c.register_guideBook = function(name, def)
 						minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
 					end
 				else
-					if not reg.sections.Main.Pages.Index.registered then
-						local y=-0.1
-						local x=1
-						local num=0
-						local form=reg.pageTmp
-						for _,v in pairs(reg.sections) do
-							if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and not v.isLocked(reader, book:get_name(), _) then
-								if v.master then
-									form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
-									y=y+0.6
-									num=num+1
-									if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-								else
-									form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-									y=y+0.6
-									num=num+1
-									if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-								end
-							end
-						end
-						minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
-						meta:set_string("guidebooks:place", "Main:Index")
-					else
-						local form=reg.sections.Main.Pages.Index.form
-						if reg.sections.Main.Pages.Index.text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text1.."]" end
-						if reg.sections.Main.Pages.Index.text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text2.."]" end
-						form=form..reg.prevTmp
-						minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
-						meta:set_string("guidebooks:place", "Main:Index")
-					end
+					genSecList(reg, meta, reader, book, def)
 				end
 				reader:set_wielded_item(book)
 			elseif fields.prev then
@@ -171,36 +164,7 @@ c.register_guideBook = function(name, def)
 									meta:set_string("guidebooks:place", nil)
 									minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
 								else
-									if not reg.sections.Main.Pages.Index.registered then
-										local y=-0.1
-										local x=1
-										local num=0
-										local form=reg.pageTmp
-										for _,v in pairs(reg.sections) do
-											if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and not v.isLocked(reader, book:get_name(), _) then
-												if v.master then
-													form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
-													y=y+0.6
-													num=num+1
-													if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-												else
-													form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-													y=y+0.6
-													num=num+1
-													if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-												end
-											end
-										end
-										minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
-										meta:set_string("guidebooks:place", "Main:Index")
-									else
-										local form=reg.sections.Main.Pages.Index.form
-										if reg.sections.Main.Pages.Index.text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text1.."]" end
-										if reg.sections.Main.Pages.Index.text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text2.."]" end
-										form=form..reg.prevTmp
-										minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
-										meta:set_string("guidebooks:place", "Main:Index")
-									end
+									genSecList(reg, meta, reader, book, def)
 								end
 							end
 						else
@@ -208,73 +172,15 @@ c.register_guideBook = function(name, def)
 								meta:set_string("guidebooks:place", nil)
 								minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
 							else
-								if not reg.sections.Main.Pages.Index.registered then
-									local y=-0.1
-									local x=1
-									local num=0
-									local form=reg.pageTmp
-									for _,v in pairs(reg.sections) do
-										if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and not v.isLocked(reader, book:get_name(), _) then
-											if v.master then
-												form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
-												y=y+0.6
-												num=num+1
-												if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-											else
-												form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-												y=y+0.6
-												num=num+1
-												if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-											end
-										end
-									end
-									minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
-									meta:set_string("guidebooks:place", "Main:Index")
-								else
-									local form=reg.sections.Main.Pages.Index.form
-									if reg.sections.Main.Pages.Index.text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text1.."]" end
-									if reg.sections.Main.Pages.Index.text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text2.."]" end
-									form=form..reg.prevTmp
-									minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
-									meta:set_string("guidebooks:place", "Main:Index")
-								end
+								genSecList(reg, meta, reader, book, def)
 							end
 						end
 					else
-						if not reg.sections.Main.Pages.Index.registered then
-							if meta:get_string("guidebooks:place")=="Main:Index" then
-								meta:set_string("guidebooks:place", nil)
-								minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
-							else
-								local y=-0.1
-								local x=1
-								local num=0
-								local form=reg.pageTmp
-								for _,v in pairs(reg.sections) do
-									if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and not v.isLocked(reader, book:get_name(), _) then
-										if v.master then
-											form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
-											y=y+0.6
-											num=num+1
-											if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-										else
-											form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-											y=y+0.6
-											num=num+1
-											if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-										end
-									end
-								end
-								minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
-								meta:set_string("guidebooks:place", "Main:Index")
-							end
+						if meta:get_string("guidebooks:place")=="Main:Index" then
+							meta:set_string("guidebooks:place", nil)
+							minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
 						else
-							local form=reg.sections.Main.Pages.Index.form
-							if reg.sections.Main.Pages.Index.text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text1.."]" end
-							if reg.sections.Main.Pages.Index.text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections.Main.Pages.Index.text2.."]" end
-							form=form..reg.prevTmp
-							minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
-							meta:set_string("guidebooks:place", "Main:Index")
+							genSecList(reg, meta, reader, book, def)
 						end
 					end
 				end
@@ -332,7 +238,7 @@ c.register_guideBook = function(name, def)
 	local next="style[next;border=false]image_button["..(_def.style.page.w-0.7)..","..(_def.style.page.h-0.5)..";1,1;".._def.style.page.next..";next;]"
 	local prev="style[prev;border=false]image_button[0,"..(_def.style.page.h-0.5)..";1,1;".._def.style.page.prev..";prev;]"
 	
-	guideBooks.registered[name]={coverTmp=cover, pageTmp=page, nextTmp=next, prevTmp=prev, sections={Main={Pages={Index={}}}, Hidden={Pages={}}}}
+	guideBooks.registered[name]={coverTmp=cover, pageTmp=page, nextTmp=next, prevTmp=prev, sections={Main={Pages={Index={}}}, Hidden={Pages={}}}, sectionOrder={}}
 	
 	minetest.register_craftitem(name, _def)
 end
@@ -343,6 +249,7 @@ c.register_section = function(book, name, def)
 		if def.Pages.Index then
 			def.Pages.Index.Registered=true
 		end
+		def.name=name
 		if def.slave and def.master then error("Attempt to register slave as index") end
 		if def.slave then
 			if guideBooks.registered[book].sections[def.slave] and guideBooks.registered[book].sections[def.slave].master and guideBooks.indices[book..def.slave] then
@@ -355,11 +262,11 @@ c.register_section = function(book, name, def)
 			guideBooks.indices[book..name]={}
 		end
 		def.name=name
-		if def.locked then guideBooks.locks[name]=book..":"..name..":locked" end
-		def.isLocked = function(player, book, section)
-			return player:get_meta():get_string(book..":"..section..":".."locked") == "true"
+		def.isUnLocked = function(player, book, section)
+			return player:get_meta():get_string(book..":"..section..":".."unlocked") == "true"
 		end
 		guideBooks.registered[book].sections[name]=def
+		guideBooks.registered[book].sectionOrder[#guideBooks.registered[book].sectionOrder+1]=name
 	else
 		error("Attempt to register section in non-existent guide")
 	end
@@ -383,26 +290,23 @@ c.register_page = function(book, section, num, def)
 	end
 end
 
-minetest.register_on_joinplayer(function(player)
-	local meta=player:get_meta()
-	for _,v in ipairs(guideBooks.locks) do
-		if meta:get_string(v) then
-			if not meta:get_string(v) == "false" then
-				meta:set_string(v, "true")
-			end
-		else
-			meta:set_string(v, "true")
-		end
-	end
-end)
-
-minetest.register_chatcommand("unlock", {
+minetest.register_chatcommand("gb_set", {
 	params="name",
-	description="",
+	description="set a met afield of your player to 'true'",
 	privs={server=true},
 	func=function(name, param)
-		local player=minetest.get_player_by_name(player)
-		player:get_meta():set_string(param, "false")
+		local player=minetest.get_player_by_name(name)
+		player:get_meta():set_string(param, "true")
+	end,
+})
+
+minetest.register_chatcommand("gb_remove", {
+	params="name",
+	description="remove a meta field from your player",
+	privs={server=true},
+	func=function(name, param)
+		local player=minetest.get_player_by_name(name)
+		player:get_meta():set_string(param, nil)
 	end,
 })
 
