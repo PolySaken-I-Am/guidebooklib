@@ -275,6 +275,7 @@ c.register_page = function(book, section, num, def)
 	end
 end
 
+--[[ Testing Code
 minetest.register_chatcommand("gb_set", {
 	params="name",
 	description="set a meta field of your player to 'true'",
@@ -299,7 +300,7 @@ guideBooks.Common=c
 
 guideBooks.Common.register_guideBook("guidebooks:test", {description_long="A book about books", style={cover={bg="guidebooks_cover.png^guidebooks_title.png"}}})
 
---guideBooks.Common.register_page("guidebooks:test", "Main", "Index", {text1="A custom", text2="Index Page"})
+guideBooks.Common.register_page("guidebooks:test", "Main", "Index", {text1="A custom", text2="Index Page"})
 
 guideBooks.Common.register_section("guidebooks:test", "a", {description="Section a"})
 guideBooks.Common.register_section("guidebooks:test", "b", {description="Section b"})
@@ -328,4 +329,4 @@ guideBooks.Common.register_section("guidebooks:test", "i", {description="Connect
 guideBooks.Common.register_page("guidebooks:test", "i", 1, {text2="Wow A link", extra="style[goto_d;border=false]image_button[1,1;4,1;guidebooks_bscBtn.png;goto_d;hidden section]"})
 
 guideBooks.Common.register_section("guidebooks:test", "j", {description="Locked section", locked=true})
-guideBooks.Common.register_page("guidebooks:test", "j", 1, {text1="Some more", text2="Even more text"})
+guideBooks.Common.register_page("guidebooks:test", "j", 1, {text1="Some more", text2="Even more text"})]]
