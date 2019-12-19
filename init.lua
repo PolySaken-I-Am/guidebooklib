@@ -14,22 +14,7 @@ local genSecList=function(reg, meta, reader, book, def)
 		for _,v in pairs(reg.sectionOrder) do
 			local _ = v
 			local v= reg.sections[_]
-			if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave then
-				if v.locked then
-					if v.isUnLocked(reader, book:get_name(), _) then
-						if v.master then
-							form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
-							y=y+0.6
-							num=num+1
-							if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-						else
-							form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-							y=y+0.6
-							num=num+1
-							if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
-						end
-					end
-				else
+			if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and v.isUnLocked(reader, book:get_name(), _) then
 					if v.master then
 						form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
 						y=y+0.6
@@ -41,7 +26,6 @@ local genSecList=function(reg, meta, reader, book, def)
 						num=num+1
 						if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
 					end
-				end
 			end
 		end
 		minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), form)
@@ -140,7 +124,7 @@ c.register_guideBook = function(name, def)
 				else
 					genSecList(reg, meta, reader, book, def)
 				end
-				reader:set_wielded_item(book)
+				minetest.after(0, function()reader:set_wielded_item(book)end)
 			elseif fields.prev then
 				if #seg == 2 then
 					local pn=tonumber(seg[2])
@@ -207,7 +191,7 @@ c.register_guideBook = function(name, def)
 								local num=0
 								local form=reg.pageTmp
 								for __,v in pairs(reg.sections) do
-									if  v.slave and v.slave==_ and not v.hidden and not v.isLocked(reader, book:get_name(), __) then
+									if  v.slave and v.slave==_ and not v.hidden and v.isUnLocked(reader, book:get_name(), __) then
 										form=form.."style[goto_"..__..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_"..__..";"..(v.description or _).."]"
 										y=y+0.6
 										num=num+1
@@ -237,8 +221,9 @@ c.register_guideBook = function(name, def)
 	
 	local next="style[next;border=false]image_button["..(_def.style.page.w-0.7)..","..(_def.style.page.h-0.5)..";1,1;".._def.style.page.next..";next;]"
 	local prev="style[prev;border=false]image_button[0,"..(_def.style.page.h-0.5)..";1,1;".._def.style.page.prev..";prev;]"
+	local begn="style[beginning;border=false]image_button[-0.3,-0.3;1,1;".._def.style.page.begn..";beginning;]"
 	
-	guideBooks.registered[name]={coverTmp=cover, pageTmp=page, nextTmp=next, prevTmp=prev, sections={Main={Pages={Index={}}}, Hidden={Pages={}}}, sectionOrder={}}
+	guideBooks.registered[name]={coverTmp=cover, pageTmp=page, nextTmp=next, prevTmp=prev, begnTmp=begn, sections={Main={Pages={Index={}}}, Hidden={Pages={}}}, sectionOrder={}}
 	
 	minetest.register_craftitem(name, _def)
 end
@@ -263,7 +248,7 @@ c.register_section = function(book, name, def)
 		end
 		def.name=name
 		def.isUnLocked = function(player, book, section)
-			return player:get_meta():get_string(book..":"..section..":".."unlocked") == "true"
+			return (not def.locked) or player:get_meta():get_string(book..":"..section..":".."unlocked") == "true"
 		end
 		guideBooks.registered[book].sections[name]=def
 		guideBooks.registered[book].sectionOrder[#guideBooks.registered[book].sectionOrder+1]=name
@@ -292,7 +277,7 @@ end
 
 minetest.register_chatcommand("gb_set", {
 	params="name",
-	description="set a met afield of your player to 'true'",
+	description="set a meta field of your player to 'true'",
 	privs={server=true},
 	func=function(name, param)
 		local player=minetest.get_player_by_name(name)
