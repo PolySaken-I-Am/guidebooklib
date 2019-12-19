@@ -275,6 +275,8 @@ c.register_page = function(book, section, num, def)
 	end
 end
 
+guideBooks.Common=c
+
 --[[ Testing Code
 minetest.register_chatcommand("gb_set", {
 	params="name",
@@ -296,7 +298,7 @@ minetest.register_chatcommand("gb_remove", {
 	end,
 })
 
-guideBooks.Common=c
+
 
 guideBooks.Common.register_guideBook("guidebooks:test", {description_long="A book about books", style={cover={bg="guidebooks_cover.png^guidebooks_title.png"}}})
 
