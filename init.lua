@@ -43,6 +43,8 @@ end
 c.register_guideBook = function(name, def)
 	local _def = {}
 	
+	_def.ptype=def.ptype or false
+
 	_def.description=def.description_short or string.split(name, ":")[1].." Guidebook"
 	if def.description_long then _def.description=_def.description.."\n"..def.description_long end
 	
@@ -99,8 +101,12 @@ c.register_guideBook = function(name, def)
 						if reg.sections[seg[1]] then
 							if reg.sections[seg[1]].Pages[pn] then
 								local form=reg.sections[seg[1]].Pages[pn].form
-								if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
-								if reg.sections[seg[1]].Pages[pn].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text2.."]" end
+								if reg.ptype then
+									if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w)-1)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
+								else
+									if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
+									if reg.sections[seg[1]].Pages[pn].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text2.."]" end
+								end
 								if reg.sections[seg[1]].Pages[pn+1] then
 									form=form..reg.nextTmp
 								end
@@ -133,8 +139,12 @@ c.register_guideBook = function(name, def)
 						if reg.sections[seg[1]] then
 							if reg.sections[seg[1]].Pages[pn] then
 								local form=reg.sections[seg[1]].Pages[pn].form
-								if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
-								if reg.sections[seg[1]].Pages[pn].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text2.."]" end
+								if reg.ptype then
+									if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w)-1)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
+								else
+									if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
+									if reg.sections[seg[1]].Pages[pn].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text2.."]" end
+								end
 								if reg.sections[seg[1]].Pages[pn+1] then
 									form=form..reg.nextTmp
 								end
@@ -174,8 +184,12 @@ c.register_guideBook = function(name, def)
 					if fields["goto_".._] then
 						if v.Pages[1] then
 							local form=v.Pages[1].form
-							if v.Pages[1].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text1.."]" end
-							if v.Pages[1].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text2.."]" end
+							if reg.ptype then
+								if v.Pages[1].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w)-1)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text1.."]" end
+							else
+								if v.Pages[1].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text1.."]" end
+								if v.Pages[1].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text2.."]" end
+							end
 							if v.Pages[2] then
 								form=form..reg.nextTmp
 							end
@@ -223,7 +237,7 @@ c.register_guideBook = function(name, def)
 	local prev="style[prev;border=false]image_button[0,"..(_def.style.page.h-0.5)..";1,1;".._def.style.page.prev..";prev;]"
 	local begn="style[beginning;border=false]image_button[-0.3,-0.3;1,1;".._def.style.page.begn..";beginning;]"
 	
-	guideBooks.registered[name]={coverTmp=cover, pageTmp=page, nextTmp=next, prevTmp=prev, begnTmp=begn, sections={Main={Pages={Index={}}}, Hidden={Pages={}}}, sectionOrder={}}
+	guideBooks.registered[name]={coverTmp=cover, pageTmp=page, nextTmp=next, prevTmp=prev, begnTmp=begn, sections={Main={Pages={Index={}}}, Hidden={Pages={}}}, sectionOrder={}, ptype=_def.ptype}
 	
 	minetest.register_craftitem(name, _def)
 end

@@ -30,7 +30,8 @@ guideBooks.Common.register_guideBook("modname:itemname", { --modname is the name
 			start="modname_start.png"                      ---- the filename of an image to use for the 'first page' button
 		},
 		buttonGeneric="modname_button.png",                --- A generic button image
-	}
+	},
+	ptype=false,						-- When true, the book will only display text1 on each page
 })
 
 
