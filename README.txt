@@ -49,7 +49,8 @@ guideBooks.Common.register_section(
 		slave=false,                --- Set to false to show in the main index, set to the name of another section to show in that index. cannot be used with master=true
 		Pages={                		--- The pages to preload into the section (use only for certain instances when required)
 			Index={}                ---- A special page used only by the 'Main' section that loads after the cover
-		}
+		},
+		locked=false                --- If this is true, only players with the meta field <bookItem>:<sectionName>:unlocked=="true" will be able to see this section
 	}
 )
 
@@ -67,4 +68,4 @@ guideBooks.Common.register_page(
 	}
 )
 
-The page 'Index' exists in the 'MAin' section by default but can be overriden.
+The page 'Index' exists in the 'Main' section by default but can be overriden.
