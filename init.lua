@@ -15,16 +15,28 @@ local genSecList=function(reg, meta, reader, book, def)
 			local _ = v
 			local v= reg.sections[_]
 			if  _ ~= "Main" and _ ~= "Hidden" and not v.hidden and not v.slave and v.isUnLocked(reader, book:get_name(), _) then
-					if v.master then
-						form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
-						y=y+0.6
-						num=num+1
-						if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+					if def.ptype then
+						if v.master then
+							form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w)-2)..",0.7;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
+							y=y+0.6
+							num=num+1
+						else
+							form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w)-2)..",0.7;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
+							y=y+0.6
+							num=num+1
+						end
 					else
-						form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
-						y=y+0.6
-						num=num+1
-						if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+						if v.master then
+							form=form.."style[gotoM_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";gotoM_".._..";"..(v.description or _).."]"
+							y=y+0.6
+							num=num+1
+							if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+						else
+							form=form.."style[goto_".._..";border=false]image_button["..x..","..y..";"..((def.style.page.w/2)-2)..",0.5;"..def.style.buttonGeneric..";goto_".._..";"..(v.description or _).."]"
+							y=y+0.6
+							num=num+1
+							if num>13 then x=(def.style.page.w/2)+1 y=-0.1 num=0 end
+						end
 					end
 			end
 		end
@@ -290,59 +302,3 @@ c.register_page = function(book, section, num, def)
 end
 
 guideBooks.Common=c
-
---[[ Testing Code
-minetest.register_chatcommand("gb_set", {
-	params="name",
-	description="set a meta field of your player to 'true'",
-	privs={server=true},
-	func=function(name, param)
-		local player=minetest.get_player_by_name(name)
-		player:get_meta():set_string(param, "true")
-	end,
-})
-
-minetest.register_chatcommand("gb_remove", {
-	params="name",
-	description="remove a meta field from your player",
-	privs={server=true},
-	func=function(name, param)
-		local player=minetest.get_player_by_name(name)
-		player:get_meta():set_string(param, nil)
-	end,
-})
-
-
-
-guideBooks.Common.register_guideBook("guidebooks:test", {description_long="A book about books", style={cover={bg="guidebooks_cover.png^guidebooks_title.png"}}})
-
-guideBooks.Common.register_page("guidebooks:test", "Main", "Index", {text1="A custom", text2="Index Page"})
-
-guideBooks.Common.register_section("guidebooks:test", "a", {description="Section a"})
-guideBooks.Common.register_section("guidebooks:test", "b", {description="Section b"})
-guideBooks.Common.register_section("guidebooks:test", "c", {description="Section c"})
-
-guideBooks.Common.register_page("guidebooks:test", "a", 1, {text1="Some text", text2="Some other text"})
-
-guideBooks.Common.register_page("guidebooks:test", "b", 1, {text1="A page", text2=""})
-guideBooks.Common.register_page("guidebooks:test", "b", 2, {text1="Another", text2=""})
-
-guideBooks.Common.register_page("guidebooks:test", "c", 1, {text1="", text2="An image", extra="background[0,0;5,8;guidebooks_map.png;false]"})
-
-guideBooks.Common.register_section("guidebooks:test", "d", {description="Hidden Section", hidden=1})
-guideBooks.Common.register_page("guidebooks:test", "d", 1, {text1="wow you", text2="found the"})
-guideBooks.Common.register_page("guidebooks:test", "d", 2, {text1="hidden", text2="section"})
-
-guideBooks.Common.register_section("guidebooks:test", "e", {description="Empty Section"})
-guideBooks.Common.register_section("guidebooks:test", "f", {description="Master Section", master=1})
-guideBooks.Common.register_section("guidebooks:test", "g", {description="Empty Slave Section", slave="f"})
-guideBooks.Common.register_section("guidebooks:test", "h", {description="Slave Section", slave="f"})
-
-guideBooks.Common.register_page("guidebooks:test", "h", 1, {text1="Some text", text2="Some other text"})
-guideBooks.Common.register_page("guidebooks:test", "h", 2, {text1="Some more", text2="Even more text"})
-
-guideBooks.Common.register_section("guidebooks:test", "i", {description="Connected Slave Section", slave="f"})
-guideBooks.Common.register_page("guidebooks:test", "i", 1, {text2="Wow A link", extra="style[goto_d;border=false]image_button[1,1;4,1;guidebooks_bscBtn.png;goto_d;hidden section]"})
-
-guideBooks.Common.register_section("guidebooks:test", "j", {description="Locked section", locked=true})
-guideBooks.Common.register_page("guidebooks:test", "j", 1, {text1="Some more", text2="Even more text"})]]
