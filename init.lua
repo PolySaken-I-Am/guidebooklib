@@ -114,7 +114,7 @@ c.register_guideBook = function(name, def)
 							if reg.sections[seg[1]].Pages[pn] then
 								local form=reg.sections[seg[1]].Pages[pn].form
 								if reg.ptype then
-									if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w)-1)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
+									if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w))..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
 								else
 									if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
 									if reg.sections[seg[1]].Pages[pn].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text2.."]" end
@@ -152,7 +152,7 @@ c.register_guideBook = function(name, def)
 							if reg.sections[seg[1]].Pages[pn] then
 								local form=reg.sections[seg[1]].Pages[pn].form
 								if reg.ptype then
-									if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w)-1)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
+									if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w))..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
 								else
 									if reg.sections[seg[1]].Pages[pn].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text1.."]" end
 									if reg.sections[seg[1]].Pages[pn].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-1)..";;;"..reg.sections[seg[1]].Pages[pn].text2.."]" end
@@ -197,7 +197,7 @@ c.register_guideBook = function(name, def)
 						if v.Pages[1] then
 							local form=v.Pages[1].form
 							if reg.ptype then
-								if v.Pages[1].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w)-1)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text1.."]" end
+								if v.Pages[1].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w))..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text1.."]" end
 							else
 								if v.Pages[1].text1 then form=form.."textarea[0.5,0.5;"..((def.style.page.w/2)-1)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text1.."]" end
 								if v.Pages[1].text2 then form=form.."textarea["..((def.style.page.w/2)+0.5)..",0.5;"..((def.style.page.w/2)-0.5)..","..(def.style.page.h-0.5)..";;;"..v.Pages[1].text2.."]" end
