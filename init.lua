@@ -7,7 +7,7 @@ guideBooks.locks={}
 
 local genSecList=function(reg, meta, reader, book, def)
 	if not reg.sections.Main.Pages.Index.registered then
-		local y=-0.1
+		local y=0.5
 		local x=1
 		local num=0
 		local form=reg.pageTmp
@@ -54,15 +54,15 @@ end
 
 c.register_guideBook = function(name, def)
 	local _def = {}
-	
+
 	_def.ptype=def.ptype or false
 
 	_def.description=def.description_short or string.split(name, ":")[1].." Guidebook"
 	if def.description_long then _def.description=_def.description.."\n"..def.description_long end
-	
+
 	_def.inventory_image=def.inventory_image or "guidebooks_book.png"
 	_def.wield_image=def.wield_image or _def.inventory_image
-	
+
 	_def.stack_max=1
 
 	_def.style={}
@@ -72,21 +72,24 @@ c.register_guideBook = function(name, def)
 		_def.style.cover={w=5, h=8, bg="guidebooks_cover.png", next="guidebooks_nxtBtn.png"}
 	end
 	if def.style.page then
-		_def.style.page={w=def.style.page.w or 10, h=def.style.page.h or 8, bg=def.style.page.bg or "guidebooks_bg.png", next=def.style.page.next or "guidebooks_nxtBtn.png", prev=def.style.page.prev or "guidebooks_prvBtn.png", begn=def.style.page.start or "guidebooks_bgnBtn.png"}
+		local textcolor = def.style.page.textcolor
+		_def.style.page={w=def.style.page.w or 10, h=def.style.page.h or 8, bg=def.style.page.bg or "guidebooks_bg.png", next=def.style.page.next or "guidebooks_nxtBtn.png",
+										prev=def.style.page.prev or "guidebooks_prvBtn.png", begn=def.style.page.start or "guidebooks_bgnBtn.png", textcolor=textcolor or "white",
+										label_textcolor=def.style.page.label_textcolor or textcolor}
 	else
-		_def.style.page= {w=10, h=8, bg="guidebooks_bg.png", next="guidebooks_nxtBtn.png", prev="guidebooks_prvBtn.png", begn="guidebooks_bgnBtn.png"}
+		_def.style.page= {w=10, h=8, bg="guidebooks_bg.png", next="guidebooks_nxtBtn.png", prev="guidebooks_prvBtn.png", begn="guidebooks_bgnBtn.png", textcolor="white", label_textcolor = "white"}
 	end
-	
+
 	_def.style.buttonGeneric=def.style.buttonGeneric or "guidebooks_bscBtn.png"
-	
+
 	_def.groups={book=1, guide=1, flammable=1}
-	
+
 	minetest.register_craft({
 		type="fuel",
 		recipe=name,
 		burntime=30
 	})
-	
+
 	_def.on_use=function(book, reader, pointed_thing)
 		local meta=book:get_meta()
 		local def=minetest.registered_items[book:get_name()]
@@ -95,7 +98,7 @@ c.register_guideBook = function(name, def)
 		minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
 		return book
 	end
-	
+
 	minetest.register_on_player_receive_fields(function(reader, formname, fields)
 		local book=reader:get_wielded_item()
 		local meta=book:get_meta()
@@ -212,7 +215,7 @@ c.register_guideBook = function(name, def)
 					if fields["gotoM_".._] then
 						if v.master then
 							if guideBooks.indices[book:get_name().._] then
-								local y=-0.1
+								local y=0.5
 								local x=1
 								local num=0
 								local form=reg.pageTmp
@@ -234,7 +237,7 @@ c.register_guideBook = function(name, def)
 			end
 		end
 	end)
-	
+
 	local cover=""..
 	"size[".._def.style.cover.w..",".._def.style.cover.h.."]"..
 	"background[0,0;0,0;".._def.style.cover.bg..";true]"..
@@ -243,14 +246,16 @@ c.register_guideBook = function(name, def)
 	local page=""..
 	"size[".._def.style.page.w..",".._def.style.page.h.."]"..
 	"background[0,0;0,0;".._def.style.page.bg..";true]"..
-	"style[beginning;border=false]image_button[-0.3,-0.3;1,1;".._def.style.page.begn..";beginning;]"
-	
+	"style[beginning;border=false]image_button[-0.3,-0.3;1,1;".._def.style.page.begn..";beginning;]"..
+	"style_type[textarea;textcolor=".._def.style.page.textcolor.."]" ..
+	"style_type[image_button;textcolor=".._def.style.page.label_textcolor.."]"
+
 	local next="style[next;border=false]image_button["..(_def.style.page.w-0.7)..","..(_def.style.page.h-0.5)..";1,1;".._def.style.page.next..";next;]"
 	local prev="style[prev;border=false]image_button[0,"..(_def.style.page.h-0.5)..";1,1;".._def.style.page.prev..";prev;]"
 	local begn="style[beginning;border=false]image_button[-0.3,-0.3;1,1;".._def.style.page.begn..";beginning;]"
-	
+
 	guideBooks.registered[name]={coverTmp=cover, pageTmp=page, nextTmp=next, prevTmp=prev, begnTmp=begn, sections={Main={Pages={Index={}}}, Hidden={Pages={}}}, sectionOrder={}, ptype=_def.ptype}
-	
+
 	minetest.register_craftitem(name, _def)
 end
 
@@ -289,6 +294,7 @@ c.register_page = function(book, section, num, def)
 			local _def={}
 			_def.registered=true
 			_def.form =def.form or guideBooks.registered[book].pageTmp
+			if def.textcolor then _def.form=_def.form .. "style_type[textarea;textcolor=".. def.textcolor .. "]" end
 			if def.extra then _def.form=_def.form..def.extra end
 			if def.text1 then _def.text1=def.text1 end
 			if def.text2 then _def.text2=def.text2 end
