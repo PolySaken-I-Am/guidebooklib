@@ -8,7 +8,7 @@ work. If not, see http://creativecommons.org/licenses/by-sa/4.0/
 
 -- API --
 
-- Creating a new book 
+- Creating a new book
 guideBooks.Common.register_guideBook("modname:itemname", { --modname is the name of your mod, itemname is whatever you want
 	description_short="Book",                              -- The name of your book
 	description_long="A book about books",                 -- an optional field to give your book an extra description
@@ -17,7 +17,7 @@ guideBooks.Common.register_guideBook("modname:itemname", { --modname is the name
 	style={                                                -- a table of values that describe how your book looks
 		cover={                                            --- The very first page of your book
 			w=5,                                           ---- how wide should the cover be?
-			h=8,                                           ---- how tall should the cover be? 
+			h=8,                                           ---- how tall should the cover be?
 			bg="modname_cover.png",                        ---- the file name of an image to use for the cover
 			next="modname_next.png"                        ---- the filename of an image to use for the 'next page' button
 		},
@@ -28,8 +28,8 @@ guideBooks.Common.register_guideBook("modname:itemname", { --modname is the name
 			next="modname_next.png",                       ---- the filename of an image to use for the 'next page' button
 			prev="modname_prev.png",                       ---- the filename of an image to use for the 'previous page' button
 			start="modname_start.png"                      ---- the filename of an image to use for the 'first page' button
-            textcolor="black"                             ---- the general color of the text. Default is white. An exhaustive list can be found here => https://drafts.csswg.org/css-color/#named-colors
-            label_textcolor="dimgray"                      ---- the color of the text inside the clickable sections. Same as textcolor if not specified.
+			textcolor="black"                             ---- the general color of the text. Default is white. An exhaustive list can be found here => https://drafts.csswg.org/css-color/#named-colors
+			label_textcolor="dimgray"                      ---- the color of the text inside the clickable sections. Same as textcolor if not specified.
 		},
 		buttonGeneric="modname_button.png",                --- A generic button image
 	},
@@ -37,7 +37,7 @@ guideBooks.Common.register_guideBook("modname:itemname", { --modname is the name
 })
 
 
--- Adding a section 
+-- Adding a section
 currently a maximum of 28 sections per index is supported, meaning a book can store 784 sections if all of the sections in the main index are masters.
 (this can be circumvented by building custom directories using the 'extra' field of a page, but is not recommended)
 
@@ -64,7 +64,7 @@ guideBooks.Common.register_page(
 	"section_1",                                              -- The name of a section in the book
 	1,                                                        -- the page number (or name in the case of special pages such as Index)
 	{                                                         -- content definition
-        textcolor="cyan"                                      -- the color of the text. If specified, it overrides the general textcolor for this very page
+		textcolor="cyan"                                      -- the color of the text. If specified, it overrides the general textcolor for this very page
 		text1="foo bar",                                      --- the text to display on the first half of the page
 		text2="lorem ipsum dolor sit amet",                   --- the text to display on the second half of the page
 		extra="background[0,0;5,8;modname_image.png;false]"   --- A minetest formspec string used to add extra content to a page, such as an image
