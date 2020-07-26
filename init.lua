@@ -54,15 +54,15 @@ end
 
 c.register_guideBook = function(name, def)
 	local _def = {}
-	
+
 	_def.ptype=def.ptype or false
 
 	_def.description=def.description_short or string.split(name, ":")[1].." Guidebook"
 	if def.description_long then _def.description=_def.description.."\n"..def.description_long end
-	
+
 	_def.inventory_image=def.inventory_image or "guidebooks_book.png"
 	_def.wield_image=def.wield_image or _def.inventory_image
-	
+
 	_def.stack_max=1
 
 	_def.style={}
@@ -76,17 +76,17 @@ c.register_guideBook = function(name, def)
 	else
 		_def.style.page= {w=10, h=8, bg="guidebooks_bg.png", next="guidebooks_nxtBtn.png", prev="guidebooks_prvBtn.png", begn="guidebooks_bgnBtn.png"}
 	end
-	
+
 	_def.style.buttonGeneric=def.style.buttonGeneric or "guidebooks_bscBtn.png"
-	
+
 	_def.groups={book=1, guide=1, flammable=1}
-	
+
 	minetest.register_craft({
 		type="fuel",
 		recipe=name,
 		burntime=30
 	})
-	
+
 	_def.on_use=function(book, reader, pointed_thing)
 		local meta=book:get_meta()
 		local def=minetest.registered_items[book:get_name()]
@@ -95,7 +95,11 @@ c.register_guideBook = function(name, def)
 		minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
 		return book
 	end
-	
+
+	if def.droppable~=nil and def.droppable==false then
+		_def.on_drop=function() end
+	end
+
 	minetest.register_on_player_receive_fields(function(reader, formname, fields)
 		local book=reader:get_wielded_item()
 		local meta=book:get_meta()
@@ -234,7 +238,7 @@ c.register_guideBook = function(name, def)
 			end
 		end
 	end)
-	
+
 	local cover=""..
 	"size[".._def.style.cover.w..",".._def.style.cover.h.."]"..
 	"background[0,0;0,0;".._def.style.cover.bg..";true]"..
@@ -244,13 +248,13 @@ c.register_guideBook = function(name, def)
 	"size[".._def.style.page.w..",".._def.style.page.h.."]"..
 	"background[0,0;0,0;".._def.style.page.bg..";true]"..
 	"style[beginning;border=false]image_button[-0.3,-0.3;1,1;".._def.style.page.begn..";beginning;]"
-	
+
 	local next="style[next;border=false]image_button["..(_def.style.page.w-0.7)..","..(_def.style.page.h-0.5)..";1,1;".._def.style.page.next..";next;]"
 	local prev="style[prev;border=false]image_button[0,"..(_def.style.page.h-0.5)..";1,1;".._def.style.page.prev..";prev;]"
 	local begn="style[beginning;border=false]image_button[-0.3,-0.3;1,1;".._def.style.page.begn..";beginning;]"
-	
+
 	guideBooks.registered[name]={coverTmp=cover, pageTmp=page, nextTmp=next, prevTmp=prev, begnTmp=begn, sections={Main={Pages={Index={}}}, Hidden={Pages={}}}, sectionOrder={}, ptype=_def.ptype}
-	
+
 	minetest.register_craftitem(name, _def)
 end
 
