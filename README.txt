@@ -32,7 +32,7 @@ guideBooks.Common.register_guideBook("modname:itemname", { --modname is the name
 		buttonGeneric="modname_button.png",                --- A generic button image
 	},
 	ptype=false,						-- When true, the book will only display text1 on each page
-	droppable=false					    -- When false, it doesn't allow the book to be dropped. If not specified, it's true by default
+	droppable=false					        -- When false, it doesn't allow the book to be dropped. If not specified, it's true by default
 })
 
 
