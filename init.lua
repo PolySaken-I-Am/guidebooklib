@@ -55,7 +55,7 @@ end
 c.register_guideBook = function(name, def)
 	local _def = {}
 
-	_def.ptype=def.ptype or false
+	_def.ptype=def.pad_type or def.ptype or false
 
 	_def.description=def.description_short or string.split(name, ":")[1].." Guidebook"
 	if def.description_long then _def.description=_def.description.."\n"..def.description_long end
