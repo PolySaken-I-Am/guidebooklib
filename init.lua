@@ -98,7 +98,11 @@ c.register_guideBook = function(name, def)
 		minetest.show_formspec(reader:get_player_name(), "guideBooks:book_"..book:get_name(), reg.coverTmp)
 		return book
 	end
-
+  
+	if def.droppable~=nil and def.droppable==false then
+		_def.on_drop=function() end
+	end
+  
 	minetest.register_on_player_receive_fields(function(reader, formname, fields)
 		local book=reader:get_wielded_item()
 		local meta=book:get_meta()
